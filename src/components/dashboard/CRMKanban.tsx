@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { DndContext, closestCenter, DragEndEvent, DragOverEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, closestCorners, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Phone, Mail, Plus, X, DollarSign } from "lucide-react";
+import { User, Phone, Mail, Plus, X, DollarSign, Trash2 } from "lucide-react";
 
 interface Stage { id: string; name: string; color: string | null; order: number; }
 interface Lead { id: string; name: string; email: string | null; phone: string | null; company: string | null; }
@@ -19,13 +19,9 @@ const pipelineTypes = [
   { value: "onboarding", label: "Onboarding" },
 ];
 
-function SortableCard({ card }: { card: Card }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id });
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
-
+function CardContent({ card }: { card: Card }) {
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}
-      className="glass-card rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-gold/20 transition-colors">
+    <div className="glass-card rounded-lg p-3">
       <div className="flex items-center gap-2 mb-1">
         <User className="w-3.5 h-3.5 text-gold shrink-0" />
         <p className="text-sm font-medium truncate">{card.lead?.name || "Lead"}</p>
@@ -37,10 +33,36 @@ function SortableCard({ card }: { card: Card }) {
   );
 }
 
+function SortableCard({ card, onDelete }: { card: Card; onDelete: (id: string) => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.3 : 1 };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}
+      className="cursor-grab active:cursor-grabbing hover:border-gold/20 transition-colors group relative">
+      <CardContent card={card} />
+      <button onClick={(e) => { e.stopPropagation(); onDelete(card.id); }}
+        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded bg-destructive/20 hover:bg-destructive/40 text-destructive transition-all">
+        <Trash2 className="w-3 h-3" />
+      </button>
+    </div>
+  );
+}
+
+function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} className={`space-y-2 min-h-[100px] p-2 rounded-xl border transition-colors ${isOver ? "bg-gold/5 border-gold/30" : "bg-secondary/20 border-border/30"}`}>
+      {children}
+    </div>
+  );
+}
+
 const CRMKanban = () => {
   const [pipelineType, setPipelineType] = useState("vendas");
   const [stages, setStages] = useState<Stage[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
+  const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [showAddLead, setShowAddLead] = useState<string | null>(null);
   const [showAddStage, setShowAddStage] = useState(false);
   const [newLead, setNewLead] = useState({ name: "", email: "", phone: "", value: "" });
@@ -66,45 +88,78 @@ const CRMKanban = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragStart = (event: DragStartEvent) => {
+    const card = cards.find((c) => c.id === event.active.id);
+    if (card) setActiveCard(card);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const activeCard = cards.find((c) => c.id === activeId);
+    if (!activeCard) return;
+
+    // Check if dropping over a stage column
+    const overStage = stages.find((s) => s.id === overId);
+    const overCard = cards.find((c) => c.id === overId);
+    const targetStageId = overStage?.id || overCard?.stage_id;
+
+    if (targetStageId && targetStageId !== activeCard.stage_id) {
+      setCards((prev) => prev.map((c) => c.id === activeId ? { ...c, stage_id: targetStageId } : c));
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveCard(null);
+    const { active, over } = event;
+    if (!over) return;
 
     const cardId = active.id as string;
-    const overStageId = stages.find((s) => s.id === over.id)?.id;
-    const overCard = cards.find((c) => c.id === over.id);
-    const targetStageId = overStageId || overCard?.stage_id;
+    const card = cards.find((c) => c.id === cardId);
+    if (!card) return;
 
-    if (!targetStageId) return;
-
-    setCards((prev) => prev.map((c) => c.id === cardId ? { ...c, stage_id: targetStageId } : c));
-
-    const { error } = await supabase.from("pipeline_cards").update({ stage_id: targetStageId }).eq("id", cardId);
+    const { error } = await supabase.from("pipeline_cards").update({ stage_id: card.stage_id }).eq("id", cardId);
     if (error) {
       toast({ title: "Erro ao mover card", variant: "destructive" });
       fetchData();
     }
   };
 
+  const handleDeleteCard = async (cardId: string) => {
+    setCards((prev) => prev.filter((c) => c.id !== cardId));
+    const { error } = await supabase.from("pipeline_cards").delete().eq("id", cardId);
+    if (error) {
+      toast({ title: "Erro ao excluir", variant: "destructive" });
+      fetchData();
+    }
+  };
+
+  const handleDeleteStage = async (stageId: string) => {
+    const stageCards = cards.filter((c) => c.stage_id === stageId);
+    if (stageCards.length > 0) {
+      toast({ title: "Remova os cards primeiro", description: "Não é possível excluir uma etapa com cards.", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase.from("pipeline_stages").delete().eq("id", stageId);
+    if (error) toast({ title: "Erro ao excluir etapa", variant: "destructive" });
+    else fetchData();
+  };
+
   const handleAddLead = async (stageId: string) => {
     if (!newLead.name) return;
     setLoading(true);
     try {
-      // Create lead
       const { data: lead, error: leadErr } = await supabase.from("leads").insert({
-        name: newLead.name,
-        email: newLead.email || null,
-        phone: newLead.phone || null,
-        source: "manual",
-        status: "new",
+        name: newLead.name, email: newLead.email || null, phone: newLead.phone || null, source: "manual", status: "new",
       }).select("id").single();
       if (leadErr) throw leadErr;
 
-      // Create pipeline card
       const { error: cardErr } = await supabase.from("pipeline_cards").insert({
-        lead_id: lead.id,
-        stage_id: stageId,
-        order: cards.filter((c) => c.stage_id === stageId).length,
+        lead_id: lead.id, stage_id: stageId, order: cards.filter((c) => c.stage_id === stageId).length,
         value: newLead.value ? parseFloat(newLead.value) : null,
       });
       if (cardErr) throw cardErr;
@@ -125,10 +180,7 @@ const CRMKanban = () => {
     setLoading(true);
     try {
       const { error } = await supabase.from("pipeline_stages").insert({
-        name: newStageName,
-        pipeline_type: pipelineType,
-        order: stages.length,
-        color: newStageColor,
+        name: newStageName, pipeline_type: pipelineType, order: stages.length, color: newStageColor,
       });
       if (error) throw error;
       toast({ title: "Etapa criada!" });
@@ -163,7 +215,6 @@ const CRMKanban = () => {
         </div>
       </div>
 
-      {/* Add Stage Form */}
       {showAddStage && (
         <div className="glass-card-gold rounded-xl p-4 mb-6 flex items-end gap-3 flex-wrap">
           <div className="flex-1 min-w-[200px]">
@@ -185,7 +236,7 @@ const CRMKanban = () => {
         </div>
       )}
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {stages.map((stage) => {
             const stageCards = cards.filter((c) => c.stage_id === stage.id);
@@ -199,9 +250,12 @@ const CRMKanban = () => {
                     className="p-1 rounded hover:bg-secondary/50 text-muted-foreground hover:text-gold transition-colors">
                     <Plus className="w-3.5 h-3.5" />
                   </button>
+                  <button onClick={() => handleDeleteStage(stage.id)}
+                    className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
 
-                {/* Add lead inline form */}
                 {showAddLead === stage.id && (
                   <div className="glass-card-gold rounded-lg p-3 mb-2 space-y-2">
                     <Input placeholder="Nome *" value={newLead.name} onChange={(e) => setNewLead({ ...newLead, name: e.target.value })} className="h-8 text-xs bg-secondary/50 border-border/50" />
@@ -220,9 +274,9 @@ const CRMKanban = () => {
                 )}
 
                 <SortableContext items={stageCards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-                  <div className="space-y-2 min-h-[100px] p-2 rounded-xl bg-secondary/20 border border-border/30">
+                  <DroppableColumn id={stage.id}>
                     {stageCards.map((card) => (
-                      <SortableCard key={card.id} card={card} />
+                      <SortableCard key={card.id} card={card} onDelete={handleDeleteCard} />
                     ))}
                     {stageCards.length === 0 && showAddLead !== stage.id && (
                       <button onClick={() => setShowAddLead(stage.id)}
@@ -231,13 +285,12 @@ const CRMKanban = () => {
                         Adicionar lead
                       </button>
                     )}
-                  </div>
+                  </DroppableColumn>
                 </SortableContext>
               </div>
             );
           })}
 
-          {/* Quick add stage column */}
           {!showAddStage && (
             <button onClick={() => setShowAddStage(true)}
               className="flex-shrink-0 w-72 min-h-[150px] rounded-xl border-2 border-dashed border-border/30 flex flex-col items-center justify-center text-muted-foreground hover:text-gold hover:border-gold/30 transition-colors">
@@ -246,6 +299,14 @@ const CRMKanban = () => {
             </button>
           )}
         </div>
+
+        <DragOverlay>
+          {activeCard ? (
+            <div className="w-72 opacity-90 rotate-2">
+              <CardContent card={activeCard} />
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </div>
   );
