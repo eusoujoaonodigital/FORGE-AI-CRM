@@ -10,6 +10,8 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Booking from "./pages/Booking";
 import Quiz from "./pages/Quiz";
+import PageEditor from "./pages/PageEditor";
+import PublicPage from "./pages/PublicPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/agendar" element={<Booking />} />
             <Route path="/quiz/:slug" element={<Quiz />} />
+            <Route path="/editor/:pageId" element={<PageEditor />} />
+            <Route path="/p/:slug" element={<PublicPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
