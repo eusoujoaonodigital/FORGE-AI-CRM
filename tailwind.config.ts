@@ -14,8 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["'Playfair Display'", "serif"],
-        body: ["'Inter'", "sans-serif"],
+        body: ["'Inter'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -23,10 +22,15 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        gold: {
-          DEFAULT: "hsl(var(--gold))",
-          light: "hsl(var(--gold-light))",
-          dark: "hsl(var(--gold-dark))",
+        lime: {
+          DEFAULT: "hsl(var(--lime))",
+          light: "hsl(var(--lime-light))",
+          dark: "hsl(var(--lime-dark))",
+        },
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          raised: "hsl(var(--surface-raised))",
+          border: "hsl(var(--surface-border))",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -93,9 +97,9 @@ export default {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
-        pulse_gold: {
-          "0%, 100%": { boxShadow: "0 0 20px -5px hsl(43 74% 49% / 0.3)" },
-          "50%": { boxShadow: "0 0 40px -5px hsl(43 74% 49% / 0.5)" },
+        "pulse-lime": {
+          "0%, 100%": { boxShadow: "0 0 20px -5px hsl(84 81% 44% / 0.2)" },
+          "50%": { boxShadow: "0 0 40px -5px hsl(84 81% 44% / 0.4)" },
         },
       },
       animation: {
@@ -104,7 +108,7 @@ export default {
         "fade-up": "fade-up 0.6s ease-out forwards",
         "fade-in": "fade-in 0.5s ease-out forwards",
         shimmer: "shimmer 3s linear infinite",
-        pulse_gold: "pulse_gold 2s ease-in-out infinite",
+        "pulse-lime": "pulse-lime 2s ease-in-out infinite",
       },
     },
   },

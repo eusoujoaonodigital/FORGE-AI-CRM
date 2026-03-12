@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,61 +6,62 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 95%;
 
-    --card: 240 6% 6%;
+    --card: 0 0% 4%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 240 6% 6%;
+    --popover: 0 0% 4%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 43 74% 49%;
-    --primary-foreground: 240 10% 3.9%;
+    --primary: 84 81% 44%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 240 4% 12%;
-    --secondary-foreground: 0 0% 85%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 0 0% 70%;
 
-    --muted: 240 4% 14%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 43 74% 49%;
-    --accent-foreground: 240 10% 3.9%;
+    --accent: 84 81% 44%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 43 74% 49%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 84 81% 44%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Custom tokens */
-    --gold: 43 74% 49%;
-    --gold-light: 43 80% 65%;
-    --gold-dark: 43 70% 35%;
-    --glass: 240 6% 8%;
-    --glass-border: 240 4% 18%;
+    --lime: 84 81% 44%;
+    --lime-light: 84 85% 55%;
+    --lime-dark: 84 70% 30%;
 
-    --gradient-gold: linear-gradient(135deg, hsl(43 74% 49%), hsl(38 80% 55%), hsl(43 74% 49%));
-    --gradient-gold-text: linear-gradient(135deg, hsl(43 80% 65%), hsl(38 85% 70%), hsl(43 74% 49%));
-    --gradient-dark: linear-gradient(180deg, hsl(240 10% 3.9%), hsl(240 8% 6%));
+    --surface: 0 0% 4%;
+    --surface-raised: 0 0% 7%;
+    --surface-border: 0 0% 12%;
 
-    --shadow-gold: 0 0 30px -5px hsl(43 74% 49% / 0.2);
-    --shadow-gold-lg: 0 0 60px -10px hsl(43 74% 49% / 0.3);
+    --gradient-lime: linear-gradient(135deg, hsl(84 81% 44%), hsl(84 85% 55%));
+    --gradient-lime-text: linear-gradient(135deg, hsl(84 85% 55%), hsl(84 90% 65%), hsl(84 81% 44%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 0%), hsl(0 0% 3%));
 
-    --font-display: 'Playfair Display', serif;
-    --font-body: 'Inter', sans-serif;
+    --shadow-lime: 0 0 30px -5px hsl(84 81% 44% / 0.15);
+    --shadow-lime-lg: 0 0 60px -10px hsl(84 81% 44% / 0.25);
 
-    --sidebar-background: 240 6% 6%;
-    --sidebar-foreground: 0 0% 85%;
-    --sidebar-primary: 43 74% 49%;
-    --sidebar-primary-foreground: 240 10% 3.9%;
-    --sidebar-accent: 240 4% 12%;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 70%;
+    --sidebar-primary: 84 81% 44%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 8%;
     --sidebar-accent-foreground: 0 0% 85%;
-    --sidebar-border: 240 4% 16%;
-    --sidebar-ring: 43 74% 49%;
+    --sidebar-border: 0 0% 12%;
+    --sidebar-ring: 84 81% 44%;
   }
 }
 
@@ -70,58 +71,79 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
   }
 
-  h1, h2, h3, h4 {
-    font-family: var(--font-display);
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-body);
+    letter-spacing: -0.025em;
   }
 }
 
 @layer utilities {
-  .text-gradient-gold {
-    background: var(--gradient-gold-text);
+  .text-gradient-lime {
+    background: var(--gradient-lime-text);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .bg-gradient-gold {
-    background: var(--gradient-gold);
+  .bg-gradient-lime {
+    background: var(--gradient-lime);
   }
 
-  .glass-card {
-    background: hsl(var(--glass) / 0.6);
-    backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--glass-border) / 0.5);
+  .surface-card {
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--surface-border));
   }
 
-  .glass-card-gold {
-    background: hsl(var(--glass) / 0.6);
-    backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--gold) / 0.15);
+  .surface-card-lime {
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--lime) / 0.15);
   }
 
-  .shadow-gold {
-    box-shadow: var(--shadow-gold);
+  .surface-raised {
+    background: hsl(var(--surface-raised));
+    border: 1px solid hsl(var(--surface-border));
   }
 
-  .shadow-gold-lg {
-    box-shadow: var(--shadow-gold-lg);
+  .shadow-lime {
+    box-shadow: var(--shadow-lime);
+  }
+
+  .shadow-lime-lg {
+    box-shadow: var(--shadow-lime-lg);
+  }
+
+  .dot-grid {
+    background-image: radial-gradient(circle, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
   .grid-bg {
     background-image:
-      linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
+      linear-gradient(hsl(var(--border) / 0.2) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.2) 1px, transparent 1px);
     background-size: 60px 60px;
   }
 
   .grid-bg-subtle {
     background-image:
-      linear-gradient(hsl(var(--border) / 0.15) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.15) 1px, transparent 1px);
+      linear-gradient(hsl(var(--border) / 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.1) 1px, transparent 1px);
     background-size: 40px 40px;
+  }
+
+  .noise-bg {
+    position: relative;
+  }
+  .noise-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
   }
 }

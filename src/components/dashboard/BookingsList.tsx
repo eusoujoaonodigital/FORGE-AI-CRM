@@ -25,15 +25,8 @@ const BookingsList = () => {
 
   const fetchBookings = () => {
     if (!user) return;
-    supabase
-      .from("bookings")
-      .select("*,room:rooms(name)")
-      .eq("user_id", user.id)
-      .order("booking_date", { ascending: false })
-      .limit(50)
-      .then(({ data }) => {
-        if (data) setBookings(data as unknown as Booking[]);
-      });
+    supabase.from("bookings").select("*,room:rooms(name)").eq("user_id", user.id).order("booking_date", { ascending: false }).limit(50)
+      .then(({ data }) => { if (data) setBookings(data as unknown as Booking[]); });
   };
 
   useEffect(() => { fetchBookings(); }, [user]);
@@ -41,36 +34,33 @@ const BookingsList = () => {
   const handleCancel = async (id: string) => {
     const { error } = await supabase.from("bookings").update({ status: "cancelled" }).eq("id", id);
     if (error) toast({ title: "Erro ao cancelar", variant: "destructive" });
-    else {
-      toast({ title: "Reserva cancelada" });
-      fetchBookings();
-    }
+    else { toast({ title: "Reserva cancelada" }); fetchBookings(); }
   };
 
   const statusColors: Record<string, string> = {
-    confirmed: "bg-green-500/10 text-green-400",
-    cancelled: "bg-red-500/10 text-red-400",
+    confirmed: "bg-lime/10 text-lime",
+    cancelled: "bg-destructive/10 text-destructive",
     pending: "bg-yellow-500/10 text-yellow-400",
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-display font-bold mb-6">Minhas <span className="text-gradient-gold">Reservas</span></h2>
+      <h2 className="text-2xl font-bold tracking-tighter mb-6">Minhas <span className="text-gradient-lime">Reservas</span></h2>
       {bookings.length === 0 ? (
-        <div className="glass-card rounded-xl p-12 text-center">
-          <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="text-muted-foreground">Nenhuma reserva encontrada</p>
-          <Button variant="gold-outline" size="sm" className="mt-4" onClick={() => window.location.href = "/agendar"}>
+        <div className="surface-card rounded-lg p-12 text-center">
+          <Calendar className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Nenhuma reserva encontrada</p>
+          <Button variant="lime-outline" size="sm" className="mt-4" onClick={() => window.location.href = "/agendar"}>
             Agendar Sala
           </Button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {bookings.map((b) => (
-            <div key={b.id} className="glass-card rounded-xl p-4 flex items-center justify-between">
+            <div key={b.id} className="surface-card rounded-lg p-4 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="p-2.5 rounded-lg bg-gold/10">
-                  <Calendar className="w-5 h-5 text-gold" />
+                <div className="p-2.5 rounded-lg bg-lime/10">
+                  <Calendar className="w-4 h-4 text-lime" />
                 </div>
                 <div>
                   <p className="font-medium text-sm">{b.room?.name} {b.guest_name && <span className="text-muted-foreground">• {b.guest_name}</span>}</p>
@@ -83,7 +73,7 @@ const BookingsList = () => {
                 <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[b.status] || "bg-secondary text-foreground"}`}>
                   {b.status}
                 </span>
-                <span className="text-sm font-medium text-gold">R$ {b.price}</span>
+                <span className="text-sm font-medium text-lime">R$ {b.price}</span>
                 {b.status === "confirmed" && (
                   <Button variant="ghost" size="sm" onClick={() => handleCancel(b.id)} className="text-destructive hover:text-destructive h-8">
                     <XCircle className="w-4 h-4" />
