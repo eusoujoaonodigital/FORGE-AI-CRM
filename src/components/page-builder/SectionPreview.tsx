@@ -19,17 +19,18 @@ const renderers: Record<string, React.FC<{ config: any; isEditor?: boolean }>> =
 };
 
 const SectionPreview = ({ sections, selectedId, onSelect }: {
-  sections: Section[]; selectedId: string | null; onSelect: (id: string) => void;
+  sections: Section[]; selectedId?: string | null; onSelect?: (id: string) => void;
 }) => {
+  const isEditor = !!onSelect;
   return (
     <div>
       {sections.map((section) => {
         const Renderer = renderers[section.section_type];
         if (!Renderer) return null;
         return (
-          <div key={section.id} onClick={() => onSelect(section.id)}
-            className={`relative cursor-pointer transition-all ${selectedId === section.id ? "ring-2 ring-lime/40 ring-inset" : "hover:ring-1 hover:ring-border hover:ring-inset"}`}>
-            <Renderer config={section.config} isEditor />
+          <div key={section.id} onClick={() => onSelect?.(section.id)}
+            className={`relative ${isEditor ? "cursor-pointer" : ""} transition-all ${selectedId === section.id ? "ring-2 ring-lime/40 ring-inset" : isEditor ? "hover:ring-1 hover:ring-border hover:ring-inset" : ""}`}>
+            <Renderer config={section.config} isEditor={isEditor} />
           </div>
         );
       })}
