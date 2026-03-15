@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   LogOut, LayoutDashboard, Users, Calendar, BarChart3,
-  Globe, FileQuestion, Settings, Zap
+  Globe, FileQuestion, Settings, CalendarCog
 } from "lucide-react";
 import CRMKanban from "@/components/dashboard/CRMKanban";
 import Analytics from "@/components/dashboard/Analytics";
@@ -13,6 +13,7 @@ import BookingsList from "@/components/dashboard/BookingsList";
 import LeadsList from "@/components/dashboard/LeadsList";
 import LandingPagesList from "@/components/dashboard/LandingPagesList";
 import QuizList from "@/components/dashboard/QuizList";
+import BookingPageEditor from "@/components/dashboard/BookingPageEditor";
 
 const tabs = [
   { id: "kanban", label: "Pipeline", icon: LayoutDashboard, group: "crm" },
@@ -21,6 +22,7 @@ const tabs = [
   { id: "analytics", label: "Analytics", icon: BarChart3, group: "crm" },
   { id: "pages", label: "Pages", icon: Globe, group: "tools" },
   { id: "quizzes", label: "Quizzes", icon: FileQuestion, group: "tools" },
+  { id: "booking-editor", label: "Pg. Reservas", icon: CalendarCog, group: "tools" },
 ] as const;
 
 type Tab = (typeof tabs)[number]["id"];
@@ -42,7 +44,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
       <aside className="w-56 border-r border-border bg-card hidden md:flex flex-col shrink-0">
         <div className="h-14 flex items-center px-5 border-b border-border">
           <a href="/" className="text-base font-bold tracking-tighter">
@@ -81,7 +82,6 @@ const Dashboard = () => {
         </div>
       </aside>
 
-      {/* Mobile nav */}
       <div className="fixed bottom-0 left-0 right-0 md:hidden bg-card border-t border-border z-50">
         <div className="flex overflow-x-auto">
           {tabs.map((tab) => {
@@ -96,7 +96,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main */}
       <main className="flex-1 overflow-auto pb-20 md:pb-0">
         <div className="p-6 md:p-8">
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} key={activeTab} transition={{ duration: 0.2 }}>
@@ -106,6 +105,7 @@ const Dashboard = () => {
             {activeTab === "analytics" && <Analytics />}
             {activeTab === "pages" && <LandingPagesList />}
             {activeTab === "quizzes" && <QuizList />}
+            {activeTab === "booking-editor" && <BookingPageEditor />}
           </motion.div>
         </div>
       </main>
